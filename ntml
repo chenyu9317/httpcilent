@@ -1,0 +1,68 @@
+package com.huasan.springboot.utils;
+
+import com.alibaba.fastjson.JSONObject;
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpHost;
+import org.apache.http.auth.AuthScope;
+import org.apache.http.auth.NTCredentials;
+import org.apache.http.client.CredentialsProvider;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.protocol.HttpClientContext;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.BasicCredentialsProvider;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.util.EntityUtils;
+
+public class HttpclientForNtlm {
+
+    public static void main(String[] args) throws Exception {
+
+        String users[] = {"cys2232"};
+        JSONObject obj = new JSONObject();
+        obj.put("folderName", "test20191115");
+        obj.put("editor", users);
+        String content = String.valueOf(obj);
+        //------------------------------
+        sendPostForNtlm(content);
+
+    }
+
+    /**
+     * @target httpclient ntlm认证登录后发送post请求
+     * @param content 发送的post请求参数
+     * @throws Exception
+     */
+    public static void sendPostForNtlm(String content) throws Exception{
+
+        CloseableHttpClient httpclient = HttpClients.createDefault();
+        CredentialsProvider credsProvider = new BasicCredentialsProvider();
+
+        credsProvider.setCredentials(AuthScope.ANY,
+                new NTCredentials("sspadmin", "Helloqwe123", "", "h3c")); // domain: 域
+        HttpHost target = new HttpHost("test-it.h3c.com", 80, "http"); // hostname: 域名(前面不要http和www,截止到.com)
+// Make sure the same context is used to execute logically related requests
+        HttpClientContext context = HttpClientContext.create();
+        context.setCredentialsProvider(credsProvider);
+// Execute a cheap method first. This will trigger NTLM authentication
+        HttpPost post = new HttpPost("http://test-it.h3c.com/pm/_layouts/15/H3C.DeptSite.IT/Services/CreateFolder.aspx");  //uri : 完整的url地址
+
+        StringEntity se = new StringEntity(content);
+        se.setContentEncoding("UTF-8");
+        se.setContentType("application/json");
+        post.setEntity(se);
+
+
+        CloseableHttpResponse response = httpclient.execute(target, post, context);
+        try {
+            HttpEntity entity1 = response.getEntity();
+        } finally {
+            System.out.println("statusCode: "+response.getStatusLine());
+            System.out.println("response.Str: "+EntityUtils.toString(response.getEntity(), "utf-8"));
+            response.close();
+        }
+
+    }
+
+}
