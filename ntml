@@ -52,8 +52,22 @@ public class HttpclientForNtlm {
         se.setContentEncoding("UTF-8");
         se.setContentType("application/json");
         post.setEntity(se);
+        
+        //-------如果要传文件和字段 用form表单提---------------------------------------------
+        
+        //MultipartEntityBuilder meb = MultipartEntityBuilder.create();
+        //ContentType strContent = ContentType.create("text/plain", Charset.forName("UTF-8"));
+        //ContentType contentType = ContentType.create("application/octet-stream"); //查Mime类型，文件和文本类型不一样
 
+        //meb.addTextBody("folderName", "chen9", strContent);// 普通字段，指定编码
+        //meb.addTextBody("editor", "['cys2232']", strContent);
+        //meb.addBinaryBody("file1",file,contentType,"testFileName");  // 需要传输的文件，参数也可以是流
 
+        //HttpEntity httpEntity = meb.build();
+        //post.setEntity(httpEntity);
+        
+        //------------------------------------------------------------------------------
+        
         CloseableHttpResponse response = httpclient.execute(target, post, context);
         try {
             HttpEntity entity1 = response.getEntity();
